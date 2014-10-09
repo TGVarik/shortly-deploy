@@ -1,33 +1,31 @@
-var db = require('../config');
 var crypto = require('crypto');
 var mongoose = require('mongoose');
 
-var Link;
 
-// db.once('open', function() {
+var linkSchema = mongoose.Schema({
+  url: String,
+  base_url: String,
+  code: String,
+  title: String,
+  visits: {type: Number, default: 0},
+  userId: mongoose.Schema.Types.ObjectId,
+  createdAt: {type: Date, default: Date.now}
+});
 
-  var linkSchema = mongoose.Schema({
-    url: String,
-    base_url: String,
-    code: String,
-    title: String,
-    visits: Number,
-    //userId: mongoose.Schema.Types.ObjectId,
-    createdAt: {type: Date, default: Date.now}
-  });
+var Link = mongoose.model('Link', linkSchema, 'Links');
 
-  linkSchema.pre('save', function(next){
-    if (!this.code){
-      var shasum = crypto.createHash('sha1');
-      shasum.update(this.url);
-      //shasum.update(doc.userId);
-      this.code = shasum.digest('hex').slice(0, 5);
-    }
-    next();
-  });
+var createShortcode = function(url, userId){
+  var sha = crypto.createHash('sha1');
+  sha.update(url);
+  //sha.update(userId);
+  return sha.digest('base64').slice(0,5);
+};
 
-  Link = mongoose.model('Link', linkSchema, 'Links');
-
-// });
+linkSchema.pre('save', function(next){
+  if (!this.code){
+    this.code = createShortcode(this.url, this.userId);
+  }
+  next();
+});
 
 module.exports = Link;
