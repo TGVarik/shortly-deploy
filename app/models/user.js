@@ -1,5 +1,5 @@
 var bcrypt = require('bcrypt-nodejs');
-var Promise = require('bluebird');
+var Bluebird = require('bluebird');
 var mongoose = require('mongoose');
 
 var userSchema = mongoose.Schema({
@@ -11,10 +11,11 @@ var userSchema = mongoose.Schema({
 var User = mongoose.model('User', userSchema, 'Users');
 
 userSchema.pre('save', function(next){
-  var cipher = Promise.promisify(bcrypt.hash);
+  var cipher = Bluebird.promisify(bcrypt.hash);
   cipher(this.password, null, null)
       .bind(this)
       .then(function(hash){
+        //noinspection JSPotentiallyInvalidUsageOfThis
         this.password = hash;
         next();
       });

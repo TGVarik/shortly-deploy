@@ -4,13 +4,6 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    wait: {
-      wait: {
-        options:{
-          delay: 500
-        }
-      }
-    },
     concat: {
       options: {
         separator: ';',
@@ -105,17 +98,17 @@ module.exports = function(grunt) {
     },
     shell: {
       options: {
-        stdout: true,
-        stderr: true,
+        stdout: false,
+        stderr: false,
         async: true,
         failOnError: true,
         canKill: true
       },
       mongodev: {
-        command: 'mongod --dbpath db/mongo'
+        command: 'mongod --dbpath ./db/mongo'
       },
       mongotest: {
-        command: 'mongod --dbpath db/test'
+        command: 'mongod --dbpath ./db/test'
       },
       nodemon: {
         command: 'grunt nodemon'
@@ -152,44 +145,14 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('server-dev', [ 'shell:nodemon', 'shell:mongodev', 'wait', 'watch' ]);
-
   ////////////////////////////////////////////////////
   // Main grunt tasks
   ////////////////////////////////////////////////////
 
-  grunt.registerTask('test', [
-    'shell:mongotest',
-    'wait',
-    'jshint',
-    //'force:on',
-    'mochaTest',
-    //'force:restore',
-    'shell:mongotest:kill'
-  ]);
 
-  var previous_force_state = grunt.option("force");
 
-  grunt.registerTask("force",function(set){
-    if (set === "on") {
-      grunt.option("force",true);
-    }
-    else if (set === "off") {
-      grunt.option("force",false);
-    }
-    else if (set === "restore") {
-      grunt.option("force",previous_force_state);
-    }
-  });
-
-  grunt.registerTask('build', [
-    'concat',
-    'uglify',
-    'cssmin'
-  ]);
 
   grunt.registerTask('upload', function(n) {
-    grunt.task.requires('mochaTest');
     if(grunt.option('prod')) {
       grunt.task.run(['gitpush']);
     } else {
@@ -197,7 +160,9 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('deploy', ['test', 'upload']);
-
-
+  grunt.registerTask('server-dev', [ 'shell:nodemon', 'shell:mongodev', 'watch' ]);
+  grunt.registerTask('test'      , ['jshint', 'mocha']);
+  grunt.registerTask('mocha'     , ['shell:mongotest', 'mochaTest', 'shell:mongotest:kill']);
+  grunt.registerTask('deploy'    , ['test', 'upload']);
+  grunt.registerTask('build'     , ['concat', 'uglify', 'cssmin']);
 };

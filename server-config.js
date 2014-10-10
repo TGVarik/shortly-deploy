@@ -5,9 +5,9 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var handler = require('./lib/request-handler');
+var db = require('./app/config');
 
 var app = express();
-
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
