@@ -1,20 +1,27 @@
 var express = require('express');
 var partials = require('express-partials');
 var util = require('./lib/utility');
-
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var handler = require('./lib/request-handler');
 
 var app = express();
 
-app.configure(function() {
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(partials());
-  app.use(express.bodyParser());
-  app.use(express.static(__dirname + '/public'));
-  app.use(express.cookieParser('shhhh, very secret'));
-  app.use(express.session());
-});
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(partials());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+app.use(express.static(__dirname + '/public'));
+app.use(session({
+  secret: "hN.Xp3FC8q6G%bo9qnaP",
+  saveUninitialized: true,
+  resave: true
+}));
+
 
 app.get('/', util.checkUser, handler.renderIndex);
 app.get('/create', util.checkUser, handler.renderIndex);

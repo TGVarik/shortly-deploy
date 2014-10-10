@@ -1,7 +1,16 @@
+
 module.exports = function(grunt) {
+  require('load-grunt-tasks')(grunt);
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    wait: {
+      wait: {
+        options:{
+          delay: 500
+        }
+      }
+    },
     concat: {
       options: {
         separator: ';',
@@ -99,7 +108,8 @@ module.exports = function(grunt) {
         stdout: true,
         stderr: true,
         async: true,
-        failOnError: true
+        failOnError: true,
+        canKill: true
       },
       mongodev: {
         command: 'mongod --dbpath db/mongo'
@@ -142,18 +152,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-cssmin');
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-shell');
-  grunt.loadNpmTasks('grunt-nodemon');
-  grunt.loadNpmTasks('grunt-git');
-  grunt.loadNpmTasks('grunt-shell-spawn');
-
-  grunt.registerTask('server-dev', [ 'shell:nodemon', 'shell:mongodev', 'watch' ]);
+  grunt.registerTask('server-dev', [ 'shell:nodemon', 'shell:mongodev', 'wait', 'watch' ]);
 
   ////////////////////////////////////////////////////
   // Main grunt tasks
@@ -161,10 +160,11 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', [
     'shell:mongotest',
+    'wait',
     'jshint',
-    'force:on',
+    //'force:on',
     'mochaTest',
-    'force:restore',
+    //'force:restore',
     'shell:mongotest:kill'
   ]);
 
